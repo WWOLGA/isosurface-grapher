@@ -83,38 +83,35 @@ function meshCube(point, edgeLength, fn) {
 
 //
 //
-// Finding the triangle mesh for f(x)=0 isosurface in a sampled tetrahedral region
+// Finding the triangle mesh for the f(x)=0 isosurface in a sampled tetrahedral region
 //
-//        x1
-//        +
-//       /|\
-//      / | \
-//  x4 +--|--+ x2
-//      \ | /
-//       \|/
-//        +
-//        x3
+//         x1
+//         +
+//        /|\
+//       / | \
+//      /  |  \
+//  x4 +-- | --+ x2
+//      \  |  /
+//       \ | /
+//        \|/
+//         +
+//         x3
 //
-// Assume without loss of generality (through permutation) that
+// If the f(x)=0 isosurface passes through a tetrahedral region, then f(x1), f(x2), f(x3),
+// and f(x4) cannot all have the same sign. If these do not all have the same sign, then a
+// linear interpolation can be used to approximate the roots of f along the edges that
+// connect vertices of differing signs. Due to tetrahedral symmetry, there are two cases
+// for how the signs can differ.
 //
-// sign(f(x1)) = sign(f(x2)) = -sign(f(x3)) = -sign(f(x4))
+// In the first case, one vertex has a different sign than the other three. In this case, 
+// there will be three interpolated roots, which form a single triangle.
 //
-// implying that edges 1-3, 1-4, 2-3, 2-4 will each have an interpolated root:
-//
-// r13 = A = f(x3)/[f(x3)-f(x1)]*x1 + f(x1)/[f(x1)-f(x3)]*x3
-// r14 = B = f(x4)/[f(x4)-f(x1)]*x1 + f(x1)/[f(x1)-f(x4)]*x4
-// r23 = C = f(x3)/[f(x3)-f(x2)]*x2 + f(x2)/[f(x2)-f(x3)]*x3
-// r24 = D = f(x4)/[f(x4)-f(x2)]*x2 + f(x2)/[f(x2)-f(x4)]*x4
-
-//
-// For simplicity, let
-//
-// k13 = f(x3)/[f(x3)-f(x1)], k31 = f(x1)/[f(x1)-f(x3)]
-// k14 = f(x4)/[f(x4)-f(x1)], k41 = f(x1)/[f(x1)-f(x4)]
-// k23 = f(x3)/[f(x3)-f(x2)], k32 = f(x2)/[f(x2)-f(x3)]
-// k24 = f(x4)/[f(x4)-f(x2)], k42 = f(x2)/[f(x2)-f(x4)]
-
-// 
+// In the second case, two vertices have a different sign than the other two. In this case,
+// there will be four coplanar interpolated roots. To make a triangle mesh covering the
+// quadrilateral formed by these four roots, first pick a diagonal and then form two triangles
+// using the points on the diagonal and the two other points. A diagonal can be picked by
+// selecting two roots from along two edges that do not share any vertex. Because the roots
+// are coplanar (prove?), the choice of diagonal is not significant.
 // 
 function meshTetrahedron(points, scalars) {
     var edges = 0;
@@ -158,21 +155,21 @@ function meshTetrahedron(points, scalars) {
 //
 // Finding the root xr by linear interpolation, given (x1, f(x1)) and (x2, f(x2)):
 //
-//       |                  
-//       |                  
+//       |                   
+//       |                   
 // f(x2) +              +    
-//       |             /    
+//       |             /     
 //       |            /      
-//       |           /      
+//       |           /       
 //       |          /        
-//       |         /        
+//       |         /         
 //       |        /          
 // 0 ----+---+---+------+----
-//       |   x1 /xr     x2  
-//       |     /            
+//       |   x1 /xr     x2   
+//       |     /             
 //       |    /              
-// f(x1) +   +              
-//       |                  
+// f(x1) +   +               
+//       |                   
 //
 // Because we assume a linear interpolation, notice that
 //
